@@ -1,0 +1,184 @@
+import progressbar
+import sys
+import glob
+import torch
+import torch.nn.functional as F
+import numpy as np
+import matplotlib.pyplot as plt
+import networkx as nx
+import pickle
+import pdb
+import skimage.io as skio
+from scipy.signal import medfilt as med_filt
+import math
+import random
+import skimage.transform
+import torch.optim as optim
+from torch.optim.lr_scheduler import StepLR
+from scipy.ndimage.measurements import label
+import torchvision.transforms.functional as TF
+import dsn
+from unet import UNet
+from extra import ScaleAndShow
+from DataLoader import Load4Band
+
+##############################################################
+## Basic Training Program
+def TrainExperiment():
+    
+    verbose = 0
+    theSeed = 0
+    np.random.seed(theSeed)
+    random.seed(theSeed)
+    torch.manual_seed(theSeed)
+
+    numEpochs = 1
+    numTrain = 1
+    numValid = 20  
+    logScores = 100
+    unetFeatures = 5
+    unetDepth = 4
+    #
+    lossType = 'purity'
+    saveNum = 'purity'
+    #lossType = 'equal'
+    #saveNum = 'equal9'
+    useBatchNorm = False
+    usePadding = True
+    
+    learningRate = 1
+    rhoMemory = 0.99
+    rateStep = 100
+    learningRateGamma = 0.7
+    
+    [XT, YT, XVT, YVT] = Load4Band()
+
+    totalTrain = XT.shape[0]
+    totalValid = XVT.shape[0]
+    if numTrain < 0:
+        numTrain = totalTrain
+    if numValid < 0:
+        numValid = totalValid
+
+    print("Batch: " + str(numTrain) + " out of " + str(totalTrain) + " and " + str(numValid) + " out of " + str(totalValid))
+
+    # Setting up U-net
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
+    model = UNet(in_channels=4, n_classes=1, depth=unetDepth, wf=unetFeatures, padding=usePadding, batch_norm=useBatchNorm, up_mode='upsample').to(device)
+    print(model)
+    #return
+    
+    optimizer = optim.Adadelta(model.parameters(), rho=rhoMemory, lr=learningRate)
+    
+    # Initializing training and validation lists to be empty
+    trn_loss_lst   = []
+    trn_rerror_lst = []
+    val_loss_lst   = []
+    val_rerror_lst  = []
+
+    # Initializing best loss and random error
+    val_best_loss   = math.inf
+    val_best_rerror = math.inf
+    trn_best_loss   = math.inf
+    trn_best_rerror = math.inf
+
+    tia = np.random.permutation(totalTrain)
+    vi = np.random.permutation(totalValid)
+
+    for cepoch in range(0,numEpochs):
+        print("Epoch :    ",str(cepoch))                
+        ti = tia[0:numTrain]
+        np.random.shuffle(ti)
+        
+        model.train()
+        with torch.enable_grad():                            
+            # Bar
+            bar = progressbar.ProgressBar(maxval=numTrain, widgets=[progressbar.Bar('=', '    trn[', ']'), ' ', progressbar.Percentage()])
+            bar.start()
+            
+            # Training
+            loss_lst_epoch   = []
+            rerror_lst_epoch = []
+            for trn_idx in range(0, numTrain):
+                bar.update(trn_idx+1)
+
+                optimizer.zero_grad()
+                X1 = XT[ ti[trn_idx] ]
+                Y1 = YT[ ti[trn_idx] ]
+
+                if True:
+                    X11 = X1.detach().numpy()    
+                    Y11 = Y1.detach().numpy()    
+                    ScaleAndShow(X11[0].squeeze(), 1)
+                    ScaleAndShow(X11[1].squeeze(), 2)
+                    ScaleAndShow(X11[2].squeeze(), 3)
+                    ScaleAndShow(X11[3].squeeze(), 4)
+                    ScaleAndShow(Y11.squeeze(), 5)
+                    plt.show()
+
+                X1 = X1.unsqueeze(0)                                
+                X1 = X1.to(device)
+                Y1 = Y1.squeeze()
+                
+                ###########
+                ## Could use more gpu by putting augmentation part of pipeline??
+                #print("Loading")
+                #print(X1.shape)
+                #image = TF.rotate(image, angle)
+                uOut = model(X1)
+
+                loss, randError = dsn.RandLossDSN(uOut, Y1, lossType, trn_idx)
+
+                rerror_lst_epoch  = rerror_lst_epoch + [randError]
+                loss_lst_epoch    = loss_lst_epoch       + [loss.detach().numpy().tolist()]
+                #print("\t\tLoss   : " + str(loss.detach().numpy()) + "   Error: " + str(randError))
+                # Don't change model on last pass so that train and validation are aligned
+                if trn_idx < numTrain-1:
+                    loss.backward()
+                    optimizer.step()
+
+            # Finish bar
+            bar.finish()
+            trn_cepoch_loss    = sum(loss_lst_epoch)/len(loss_lst_epoch)
+            trn_cepoch_rerror  = sum(rerror_lst_epoch)/len(rerror_lst_epoch)
+            trn_rerror_lst     = trn_rerror_lst + [trn_cepoch_rerror]
+            trn_loss_lst       = trn_loss_lst   + [trn_cepoch_loss]
+    
+            if trn_cepoch_loss < trn_best_loss:
+                trn_best_loss       = trn_cepoch_loss
+                trn_best_loss_epoch = cepoch
+                trn_best_loss_model = model
+
+            if trn_cepoch_rerror < trn_best_rerror:
+                trn_best_rerror       = trn_cepoch_rerror
+                trn_best_rerror_epoch = cepoch
+                trn_best_rerror_model = model
+                #fname = "train_error_model_" + str(saveNum) + ".pth"
+                #print("\t\tSaving training model with error " + str(trn_best_rerror) + " to " + fname)                
+                #torch.save(trn_best_rerror_model.state_dict(), fname)
+
+            print("AVG Loss   : " + str(trn_cepoch_loss) + "   Err: " + str(trn_cepoch_rerror))
+            print("BEST Loss  : " + str(trn_best_loss) + "   Err: " + str(trn_best_rerror) + " at " + str(trn_best_loss_epoch) + ", " + str(trn_best_rerror_epoch))
+            
+            # Saving all the losses and rand_errors
+            if ((cepoch % logScores) == 0): 
+                #print("Saving train loss and errors")
+                #vname = "train_loss_" + str(saveNum) + "_" + str(cepoch) + ".pkl"
+                #with open(vname, 'wb') as f:
+                #    pickle.dump(trn_loss_lst, f)
+                vname = "train_error_" + str(saveNum) + "_final.pkl"
+                with open(vname, 'wb') as f:
+                    pickle.dump(trn_rerror_lst, f)            
+
+                vname = "train_error_" + str(saveNum) + "_" + str(cepoch) + ".pkl"
+                with open(vname, 'wb') as f:
+                    pickle.dump(trn_rerror_lst, f)            
+
+        vname = "train_error_" + str(saveNum) + "_final.pkl"
+        with open(vname, 'wb') as f:
+            pickle.dump(trn_rerror_lst, f)  
+
+if __name__ == '__main__':
+    
+    TrainExperiment()        

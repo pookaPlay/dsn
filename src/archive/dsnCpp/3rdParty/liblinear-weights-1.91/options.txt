@@ -1,0 +1,3 @@
+Usage: predict [options] test_file model_file output_file
+options:
+-b probability_estimates: whether to output probability estimates, 0 or 1 (default 0); currently for logistic regression only

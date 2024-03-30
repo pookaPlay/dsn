@@ -1,0 +1,24 @@
+
+SET(i2ml_SOURCES
+		Discriminant.cpp Discriminant.h	
+		FisherDiscriminant.cpp FisherDiscriminant.h	
+		SvmDiscriminant.cpp SvmDiscriminant.h	
+		NormalDataset.cpp NormalDataset.h	
+		SynData.cpp SynData.h	
+		KMeanFeatures.cpp KMeanFeatures.h
+		Whiten.cpp Whiten.h
+		Hungarian.cpp Hungarian.h
+		OhmHungarian.cpp OhmHungarian.h
+)
+
+INCLUDE_DIRECTORIES( 
+		${PROJECT_SOURCE_DIR}/src/3rdParty/liblinear-weights-1.91		
+		${PROJECT_SOURCE_DIR}/src/rbp-core
+		${PROJECT_SOURCE_DIR}/gtest-1.6.0/include
+)
+
+ADD_LIBRARY(i2ml_Lib ${i2ml_SOURCES} )
+TARGET_LINK_LIBRARIES(i2ml_Lib libLinearWeights)
+
+ADD_EXECUTABLE(i2ml_LibTest i2mlTest.cpp) 
+TARGET_LINK_LIBRARIES(i2mlTest rbp-core i2ml_Lib)

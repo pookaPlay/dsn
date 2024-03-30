@@ -1,0 +1,9 @@
+Experiments
+===========
+
+randTrainUnet_V1 :  Purity weighted Connected Components (baseline) using synthetic test
+randTrainUnet_V2 :  Purity weighted Connected Components (baseline) using BSDS test    
+randTrainUnet_V3 :  Purity weighted Watershed Cuts
+randTrainUnet_V4 :  Purity weighted Minimum Spanning Forrest 
+randTrainUnet_V5 :  Purity weighted Hierarchical Watershed
+

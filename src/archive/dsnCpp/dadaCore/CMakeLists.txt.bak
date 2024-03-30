@@ -1,0 +1,11 @@
+
+SET (kookaCore_SOURCES  
+	KookaDef.cpp KookaDef.h			
+	GdalMat.cpp GdalMat.h	
+	VizMat.cpp VizMat.h	
+	ConnectedComponents.cpp ConnectedComponents.h
+)
+
+ADD_LIBRARY(kookaCore STATIC ${kookaCore_SOURCES}) 
+TARGET_LINK_LIBRARIES(kookaCore ${KWIVER_LIBS}) 
+

@@ -1,0 +1,256 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % %
+% IS&T Template 
+% Patrick Vandewalle
+% January 2006
+% % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document class
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[letterpaper,twocolumn,fleqn]{article} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{ist,amsfonts, amsmath, color, amsthm}
+% add other packages here
+
+\pagestyle{empty}                % no page numbers is default
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Title and Authors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Hierarchical segmentation}
+
+\author{Reid B. Porter\\
+  Los Alamos National Laboratory\\
+ Los Alamos, NM 8745 \\
+  \texttt{rporter@lanl.gov} \\
+  %% examples of more authors
+   \AND
+ Beate G. Zimmer \\
+  Department of Mathematics and Statistics\\
+  Texas A\&M University-Corpus Christi\\
+  Corpus Christi, TX 78412 \\
+  \texttt{beate.zimmer@tamucc.edu} \\
+  \AND
+  Quan Nguyen\\
+  Department of Computer Science\\
+  University of Texas at Arlington\\
+  Arlington, TX 76019 \\
+  \texttt{remrace@gmail.com} \\
+  \AND
+  Venkatesh Jatla\\
+  Department of ???\\
+  University of New Mexico\\
+  Albuquerque, NM XX\\
+  \texttt{venkatesh.jatla@gmail.com}
+  }
+
+\date{} % date has an empty field.
+
+% correct for bad hyphenation here
+\hyphenation{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Begin document
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document} 
+
+\maketitle 
+
+\thispagestyle{empty} % prevents the first page to be numbered
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Abstract
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+Graph cut algorithms are heavily used in image segmentation. If an image is represented as a edge weighed graph, segmentation is a matter of cutting edges in a spanning tree. Two common algorithms used here are  connected component segmentations and watershed segmentations. Watershed cuts can have from leaks which cause undersegmentation. Connected components is very sensitive to noisy data in whose presence it oversegments. We hope to combat the two different weaknesses weaknesses by combining the two methods into a hierarchical model. We make use of a modified version of Kruskal's algorithm to make this NP hard problem a problem that can be calculated in polynomial time. Watershed algorithms tend to be seeded algorithms, but through our combination of the two algorithms, the connected components become the seeds.  We assume we have a finite number of ground truth classes.
+\end{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Overall Document Guidelines: Head
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Overall Document Guidelines: Head}
+\label{sec:intro}
+
+Clear document of any fonts other than Times, Arial, and Symbol. The
+paper should be formatted using the tags provided in the template,
+i.e., title, author, section, subsection, subsubsection, eq./fig.,
+references, etc.  in a 2 column format on US letter size paper ($8.5
+\times 11$ inches, or $21.6 \times 27.9$ cm).
+
+The left and right margins are set automatically to .75 inch (1.90 cm),
+and the top and bottom margins to 1.0 inch (2.54 cm). The document is in
+a 2-column format with column widths set at 3.38 inch (8.57 cm) and the
+gutter -the space between columns- at .25 inch (0.635 cm).
+
+Papers should be a maximum of 4-6 pages; longer papers will be
+returned for revision. Please do not place folios or page numbers in
+your paper. That information is inserted when we assemble the book.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Graphics and Equations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Graphics and Equations}
+Graphics and equations should fit within one column (3.38 inches
+wide), but full width (7 inch) figures are also acceptable. Equations,
+figures and figure captions each have their own style tags. Equations
+are numbered using parentheses flushed right as shown below.
+
+\begin{equation}
+\label{eq:ist}
+\textrm{IS\&T} + \textrm{members} \times \textrm{Confs.} = \textrm{Success}
+\end{equation}
+
+
+\subsection{Helpful Hints and Style Tags: Subhead}
+For a complete listing of the style tags for use in this template
+refer to Table \ref{tab:fonts}. These are the style tags for
+conference proceedings; if you use the wrong template/style tags your
+paper will be sent back to you to be reformatted.  All of these forms
+and templates related to the publication of conference papers are
+available at
+
+www.imaging.org/conferences/guidelines.cfm. 
+
+Select the specific conference and download the Authors Kit. The
+template may vary from one conference to another.
+
+The template is set up for MS Word and LaTeX. Please check the paper
+carefully to confirm that the styles have been applied correctly, then
+print it out and double check to ensure that the paper appears as
+intended.
+
+\begin{table}[!h]
+\caption{Style Tag Table: Table head}
+\label{tab:fonts}
+\begin{center}       
+\begin{tabular}{|p{0.45\columnwidth}|p{0.45\columnwidth}|} 
+\hline
+1. Title& title environment \\ \hline
+2. Byline: & \\
+Author/Affiliation & author environment \\ \hline
+3. Head & section environment \\ \hline
+4. Subhead & subsection environment \\ \hline
+5. Tertiary head & subsubsection environment \\ \hline
+6. Abstract & abstract environment \\ \hline 
+& \\ \hline
+7. Body & regular text\\ \hline
+8. Equation & equation environment\\ \hline
+9.1 Figure & align left \\ \hline
+9.2 Figure caption & caption environment \\ \hline
+10.1 Table head & caption environment \\ \hline
+10.2 Table text & tabular environment \\ \hline
+11. References & bibliography + 
+command \emph{small} to have a 1pt smaller font\\ \hline
+12. Author Bio text & biography environment\\ \hline
+13.1 List, bullet & itemize environment\\ \hline
+13.2 List, numbered & enumerate environment \\ \hline
+\end{tabular}
+\end{center}
+\end{table} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Submitting Your Paper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Submitting Your Paper}
+The submission of your paper has to be performed through the IS\&T
+submission website. Authors receive a login for this site by e-mail.
+Papers can be submitted in Postscript, Word, or WordPerfect format,
+and will be converted to PDF by the submission server. Please
+carefully review the generated PDF and verify that all the text,
+equations, figures and tables are displayed correctly before approving
+its submission.
+
+\subsection{Margins in LaTeX}
+Because of the differences between dvips conversion utilities, the
+margins of your generated PDF document might vary. Please print
+your document, and verify its margins. If they are incorrect, please
+adapt the sizes of the margins in the file \emph{ist.sty}. Typically the
+top margin should be decreased.
+
+\begin{table}[!h]
+\caption{Document Specs: Table head}
+\label{tab:specs}
+\begin{center}       
+\begin{tabular}{p{0.35\columnwidth}p{0.55\columnwidth}} 
+Paper Size & US Letter \\
+Left/right margin & .75 inch (1.90 cm) \\
+Top/bottom margin & 1 inch (2.54 cm) \\
+Columns & 2 at 3.38 inch (8.57 cm) wide. \\
+ & Spacing between columns: 0.25 inch (0.635 cm)
+\end{tabular}
+\end{center}
+\end{table} 
+
+\begin{figure}[!hb]
+  \includegraphics[width=0.3\columnwidth]{logo.png}
+  \caption{IS\&T logo.}
+  \label{Figure:logo}
+\end{figure}
+
+Please contact IS\&T with any questions or requests for assistance in
+helping prepare the paper. We look forward to having your paper
+presented at the conference and published in the conference
+proceedings.
+
+\begin{figure}[!hb]
+  \includegraphics[width=0.3\columnwidth]{logo.png}
+  \caption{IS\&T logo.}
+  \label{Figure:logo}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reference Preparation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Reference Preparation}
+Use the standard LaTeX \emph{cite} command for references in the
+text. You can then use the standard bibliography command to generate
+the list of references. Add the command \emph{small} before the
+bibliography to give it the right font size.  Reference \cite{bib1}
+style should be used for books, Reference \cite{bib2} style should be
+used for Journals, and Reference \cite{bib3} style should be used for
+Proceedings.
+
+%\section{Acknowledgments} 
+%add the acknowledgement section here
+
+% To start a new column (but not a new page) and help balance the last-page
+% column length use \vfill\pagebreak.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\small
+\begin{thebibliography}{9}
+\bibitem{bib1}John Doe, Recent Progress in Digital Halftoning II,
+  IS\&T, Springfield, VA, 1999, pg. 173.
+\bibitem{bib2}John Doe, Digital Imaging, J. Imaging. Sci. and
+  Technol., 42, 112 (1998).
+\bibitem{bib3}John Doe, An Inexpensive Micro-Goniophotometry You Can
+  Build, Proc. PICS, pg. 179. (1998).
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Biography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{biography}
+
+
+Reid Porter is a research scientist at Los Alamos National Laboratory. His research interests include machine learning, signal processing, and computer architecture. Porter has a PhD in electrical engineering from the Queensland University of Technology, Australia.
+Beate Zimmer is an Associate Professor of Mathematics at Texas A\&M University--Corpus Christi and Guest Scientist at Los Alamos National Laboratory. She received her PhD in Mathematics from the University of Illinois - Urbana/Champaign in 1994.
+Quan Nguyen is currently pursuing a PhD in Computer Science at UT Arlington and earned an MS in Mathematics from Texas A\&M -Corpus Christi  in 2019.
+Venkatesh Jatla is pursuing PhD in Computer Engineering at the University of New Mexico. His Bachelors degree in Electrical and Computer Engineering was earned at Vellore Institute of Technology (2016).
+\end{biography}
+
+\end{document} 
